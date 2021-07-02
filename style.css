@@ -1,0 +1,46 @@
+.justify-content-center{
+	display: flex;
+}
+.callout-buttons{
+	padding: 1%;
+}
+.card{
+	height: 7em;
+}
+.icon{
+	margin:auto;
+}
+.fa-square{
+	transform:rotate(45deg);
+	font-size:1.5em;
+}
+
+.center{
+	margin-left: auto;
+    margin-right: auto;
+	border: 3px;
+	border-style: solid;
+
+}
+.centerPiece{
+	margin-top: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+	margin-left: 5px;
+}
+.white{
+	background-color: darkcyan;
+	width: 80px;
+	height: 80px;
+}
+.black{
+	background-color: lightblue;
+	width: 80px;
+	height: 80px;
+}
+.selected{
+	border-style: solid;
+	border:5px;
+	border-color: orange;
+	background-color: orange;
+}
