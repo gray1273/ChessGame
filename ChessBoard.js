@@ -1,10 +1,22 @@
+
 class ChessBoard {
     constructor() {
         //Board creates a new deck, deck creates and holds all the pieces
         this.deck = new DeckKernel();
         this.prepareBoard();
+        this.turn = "White";
         
     }
+    set_turn(turn){
+        this.turn = turn;
+    }
+    get get_turn(){
+        return this.turn
+    }
+
+
+
+
 
     prepareBoard() {
         //Create the HTML chess board squares
@@ -30,6 +42,7 @@ class ChessBoard {
     document.getElementById("theBoard").innerHTML = strDiv;
     //Update the board with the pieces
     this.updateBoard();
+    
     }
 
 
@@ -58,15 +71,120 @@ class ChessBoard {
             document.getElementById(squareID).src = this.deck.inUseWhitePieces[i].get_source;
         }
         
-        this.movementBishop(this.deck.inUseWhitePieces[4]);
+        
+        console.log("White King: " + this.deck.findWhiteKing());
+    }
+    
+    checkTurn(position1, position2){
+        //Check to see if a piece is in pos1, if so check to see if it matches a turn
+        //If turn does not match, alert
+        var piece;
+        var color;
+        //Should check for check and check mate
+        if(this.deck.findIfPosFilled(position1)){
+            piece = this.deck.findByPos(position1)
+            color = piece.get_color;
+            if(color == this.get_turn){
+                //swap turn color
+                    this.flipTurn();
+                    this.movePiece(position1,position2);
+            }else{
+                alert("Cannot play out of turn");
+            }
+        }
+
     }
 
 
+    movePiece(position1, position2){
+        
+        console.log("Piece moved:     Start: "+ position1 + " Ending: " + position2);
+        
+       
+        var validMoves = [];
+        var temp = [];
+        var validMoveBool = false;
+        var deletePiece;
+        var pieceID;
 
+        if(this.deck.findIfPosFilled(position1)){
+            var piece = this.deck.findByPos(position1);
+            var type = piece.get_type;
+            switch(type){
+                case "King":
+                    validMoves = this.movementKing(piece);
+                    break;
+                case "Queen":
+                    validMoves = this.movementQueen(piece);
+                    break;
+                case "Rook":
+                    validMoves = this.movementRook(piece);
+                    break;
+                case "Bishop":
+                    validMoves = this.movementBishop(piece);
+                    break;
+                case "Pawn":
+                    validMoves = this.movementPawn(piece);
+                    break;
+                case "Knight":
+                    validMoves = this.movementKnight(piece);
+                    break;
+            }
+            console.log(piece);
+            for(let i = 0; i<validMoves.length; i++){
+                temp = validMoves[i];
+                
+                if(position2[0] == temp[0] && position2[1] == temp[1]){
+                    //update position, refresh board
+                    validMoveBool = true;
+                    //check to see if piece is already there
+                    if(this.deck.findIfPosFilled(position2)){
+                        deletePiece = this.deck.findByPos(position2);
+                        pieceID = deletePiece.get_id;
+                        if(deletePiece.get_color == "White"){
+                            //delete from inUseWhitePieces
+                            for(let i = 0; i<this.deck.inUseWhitePieces.length; i++){
+                                if(this.deck.inUseWhitePieces[i].get_id == pieceID){
+                                    this.deck.inUseWhitePieces.splice(i,1);
+                                }
+                            }
+                        }else{
+                            //delete from inUseBlackPieces
+                            for(let i = 0; i<this.deck.inUseBlackPieces.length; i++){
+                                if(this.deck.inUseBlackPieces[i].get_id == pieceID){
+                                    this.deck.inUseBlackPieces.splice(i,1);
+                                }
+                            }
+                        }
+                    }
+                    //delete piece if it is there
+                    break;
 
+                }
+            }
+            if(validMoveBool){
+                piece.set_pos(position2);
+                //Check to see if pawn promotes, remove it and call promoteQueen with it.
+                if(piece.get_type == "Pawn"){
+                    this.deck.checkPromotion(piece);
+                }
+                this.updateBoard();
+            }else{
+                alert("Invalid Move");
+                //Restore turn
+                this.flipTurn();
+            }
+    }
+    }
 
-
-
+    flipTurn(){
+        var color = this.get_turn;
+        if(color == "White"){
+            this.set_turn("Black");
+        }else{
+            this.set_turn("White");
+        }
+    }
 
     //Movement logic
     movementRook(piece){
@@ -77,43 +195,68 @@ class ChessBoard {
         var startingPos = piece.get_pos;
         var temp;
         //Check Column
-        
-        for(let i = 1; i<= 8; i++){
+        //check up
+        for(let i = startingPos[0]+1; i<= 8; i++){
             
                 if(this.deck.findIfPosFilled([i,startingPos[1]])){
-                    if(piece.get_id != this.deck.findByPos([i,startingPos[1]]).get_id){   
+                     
                         //Check to see if position filled by same or other piece
                         temp = this.deck.findByPos([i,startingPos[1]]);
-                        if(temp.get_color == piece.get_color){
-                            
-                            break;
-                        }else{
-                            //put a spot of an opposite color into the movable spot.
+                        if(temp.get_color != piece.get_color){
                             outcome.push([i,startingPos[1]]);
-                            
                             break;
                         }
-                    }      
+                       
                 }else{
                     outcome.push([i,startingPos[1]]);
                     
                 }
             
         }
-        //Check Row
-        for(let i = 1; i<= 8; i++){
+        //check down
+        for(let i = startingPos[0]-1; i>= 1; i--){
+            
+            if(this.deck.findIfPosFilled([i,startingPos[1]])){
+                
+                    //Check to see if position filled by same or other piece
+                    temp = this.deck.findByPos([i,startingPos[1]]);
+                    if(temp.get_color != piece.get_color){
+                        outcome.push([i,startingPos[1]]);
+                        break;
+                    }
+                      
+            }else{
+                outcome.push([i,startingPos[1]]);
+                
+            }
+        
+    }
+        //Check Right
+        for(let i = startingPos[1]+1; i<= 8; i++){
             if(this.deck.findIfPosFilled([startingPos[0],i])){
-                if(piece.get_id != this.deck.findByPos([startingPos[0],i]).get_id){   
+                  
                     //Check to see if position filled by same or other piece
                     temp = this.deck.findByPos([startingPos[0],i]);
-                    if(temp.get_color == piece.get_color){
-                        break;
-                    }else{
-                        //put a spot of an opposite color into the movable spot.
+                    if(temp.get_color != piece.get_color){
                         outcome.push([startingPos[0],i]);
                         break;
                     }
-                }
+                
+             }else{
+                outcome.push([startingPos[0],i]);
+            }
+            
+        }
+        //Check Left
+        for(let i = startingPos[1]-1; i>=1; i--){
+            if(this.deck.findIfPosFilled([startingPos[0],i])){
+                
+                    //Check to see if position filled by same or other piece
+                    temp = this.deck.findByPos([startingPos[0],i]);
+                    if(temp.get_color != piece.get_color){
+                        outcome.push([startingPos[0],i]);
+                        break;
+                    }
              }else{
                 outcome.push([startingPos[0],i]);
             }
@@ -249,7 +392,83 @@ class ChessBoard {
 
     movementKing(piece){
         var outcome = [];
-
+        var hold;
+        var startingPos = piece.get_pos;
+        //King can move 8 spots
+        //Check above row
+        
+        if(this.deck.findIfPosFilled([startingPos[0]+1,startingPos[1]]) && (startingPos[0]+1)<=8){
+            hold = this.deck.findByPos([startingPos[0]+1,startingPos[1]]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]+1,startingPos[1]]);
+            }
+        }else if((startingPos[0]+1)<=8){
+            outcome.push([startingPos[0]+1,startingPos[1]]);
+        }
+        //Check below
+        if(this.deck.findIfPosFilled([startingPos[0]-1,startingPos[1]]) && (startingPos[0]-1)>=1){
+            hold = this.deck.findByPos([startingPos[0]-1,startingPos[1]]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]-1,startingPos[1]]);
+            }
+        }else if((startingPos[0]-1)>=1){
+            outcome.push([startingPos[0]-1,startingPos[1]]);
+        }
+        //Check Right
+        if(this.deck.findIfPosFilled([startingPos[0],startingPos[1]+1]) && (startingPos[1]+1)<=8){
+            hold = this.deck.findByPos([startingPos[0],startingPos[1]+1]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0],startingPos[1]+1]);
+            }
+        }else if((startingPos[1]+1)<=8){
+            outcome.push([startingPos[0],startingPos[1]+1]);
+        }
+        //Check left
+        if(this.deck.findIfPosFilled([startingPos[0],startingPos[1]-1]) && (startingPos[1]-1)>=1){
+            hold = this.deck.findByPos([startingPos[0],startingPos[1]-1]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0],startingPos[1]-1]);
+            }
+        }else if((startingPos[1]-1)>=1){
+            outcome.push([startingPos[0],startingPos[1]-1]);
+        }
+        //Check topRight
+        if(this.deck.findIfPosFilled([startingPos[0]+1,startingPos[1]+1]) && (startingPos[1]+1)<=8 && (startingPos[0]+1) <=8){
+            hold = this.deck.findByPos([startingPos[0]+1,startingPos[1]+1]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]+1,startingPos[1]+1]);
+            }
+        }else if((startingPos[1]+1)<=8 && (startingPos[0]+1) <=8){
+            outcome.push([startingPos[0]+1,startingPos[1]+1]);
+        }
+        //Check topLeft
+        if(this.deck.findIfPosFilled([startingPos[0]+1,startingPos[1]-1]) && (startingPos[1]-1)>=1 && (startingPos[0]+1) <=8){
+            hold = this.deck.findByPos([startingPos[0]+1,startingPos[1]-1]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]+1,startingPos[1]-1]);
+            }
+        }else if((startingPos[1]-1)>=1 && (startingPos[0]+1) <=8){
+            outcome.push([startingPos[0]+1,startingPos[1]-1]);
+        }
+        //Check bottomRight
+        if(this.deck.findIfPosFilled([startingPos[0]-1,startingPos[1]+1]) && (startingPos[1]+1)<=8 && (startingPos[0]-1) >=1){
+            hold = this.deck.findByPos([startingPos[0]-1,startingPos[1]+1]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]-1,startingPos[1]+1]);
+            }
+        }else if((startingPos[1]+1)<=8 && (startingPos[0]-1) >=1){
+            outcome.push([startingPos[0]-1,startingPos[1]+1]);
+        }
+        //Check bottomLeft
+        if(this.deck.findIfPosFilled([startingPos[0]-1,startingPos[1]-1]) && (startingPos[1]-1)>=1 && (startingPos[0]-1) >=1){
+            hold = this.deck.findByPos([startingPos[0]-1,startingPos[1]-1]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]-1,startingPos[1]-1]);
+            }
+        }else if((startingPos[1]-1)>=1 && (startingPos[0]-1) >=1){
+            outcome.push([startingPos[0]-1,startingPos[1]-1]);
+        }
+        console.log(outcome);
         return outcome;
     }
 
@@ -261,7 +480,9 @@ class ChessBoard {
     movementQueen(piece){
         var outcome = [];
         //Queen follows same rules as bishop and rook
-        //Check for duplicates
+       
+        outcome = this.movementBishop(piece).concat(this.movementRook(piece));
+        console.log(outcome);
         return outcome;
     }
 
@@ -272,7 +493,82 @@ class ChessBoard {
 
     movementKnight(piece){
         var outcome = [];
-
+        var hold;
+        var startingPos = piece.get_pos;
+        //Every knight can move up to 8 spots
+        //Up and Right
+        if(this.deck.findIfPosFilled([startingPos[0]+2,startingPos[1]+1]) && (startingPos[0]+2)<=8 && (startingPos[1]+1) <=8){
+            hold = this.deck.findByPos([startingPos[0]+2,startingPos[1]+1]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]+2,startingPos[1]+1]);
+            }
+        }else if((startingPos[0]+2)<=8 && (startingPos[1]+1) <=8){
+            outcome.push([startingPos[0]+2,startingPos[1]+1]);
+        }
+        //Up and Left
+        if(this.deck.findIfPosFilled([startingPos[0]+2,startingPos[1]-1]) && (startingPos[0]+2)<=8 && (startingPos[1]-1) >=1){
+            hold = this.deck.findByPos([startingPos[0]+2,startingPos[1]-1]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]+2,startingPos[1]-1]);
+            }
+        }else if((startingPos[0]+2)<=8 && (startingPos[1]-1) >=1){
+            outcome.push([startingPos[0]+2,startingPos[1]-1]);
+        }
+        //Down and Right
+        if(this.deck.findIfPosFilled([startingPos[0]-2,startingPos[1]+1]) && (startingPos[0]-2)>=1 && (startingPos[1]+1) <=8){
+            hold = this.deck.findByPos([startingPos[0]-2,startingPos[1]+1]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]-2,startingPos[1]+1]);
+            }
+        }else if((startingPos[0]-2)>=1 && (startingPos[1]+1) <=8){
+            outcome.push([startingPos[0]-2,startingPos[1]+1]);
+        }
+        //Down and left
+        if(this.deck.findIfPosFilled([startingPos[0]-2,startingPos[1]-1]) && (startingPos[0]-2)>=1 && (startingPos[1]-1) >=1){
+            hold = this.deck.findByPos([startingPos[0]-2,startingPos[1]-1]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]-2,startingPos[1]-1]);
+            }
+        }else if((startingPos[0]-2)>=1 && (startingPos[1]-1) >=1){
+            outcome.push([startingPos[0]-2,startingPos[1]-1]);
+        }
+        //Right and up
+        if(this.deck.findIfPosFilled([startingPos[0]+1,startingPos[1]+2]) && (startingPos[0]+1)<=8 && (startingPos[1]+2) <=8){
+            hold = this.deck.findByPos([startingPos[0]+1,startingPos[1]+2]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]+1,startingPos[1]+2]);
+            }
+        }else if((startingPos[0]+1)<=8 && (startingPos[1]+2) <=8){
+            outcome.push([startingPos[0]+1,startingPos[1]+2]);
+        }
+        //Right and down
+        if(this.deck.findIfPosFilled([startingPos[0]-1,startingPos[1]+2]) && (startingPos[0]-1)>=1 && (startingPos[1]+2) <=8){
+            hold = this.deck.findByPos([startingPos[0]-1,startingPos[1]+2]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]-1,startingPos[1]+2]);
+            }
+        }else if((startingPos[0]-1)>=1 && (startingPos[1]+2) <=8){
+            outcome.push([startingPos[0]-1,startingPos[1]+2]);
+        }
+        //Left and up
+        if(this.deck.findIfPosFilled([startingPos[0]+1,startingPos[1]-2]) && (startingPos[0]+1)<=8 && (startingPos[1]-2) >=1){
+            hold = this.deck.findByPos([startingPos[0]+1,startingPos[1]-2]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]+1,startingPos[1]-2]);
+            }
+        }else if((startingPos[0]+1)<=8 && (startingPos[1]-2) >=1){
+            outcome.push([startingPos[0]+1,startingPos[1]-2]);
+        }
+        //Left and down
+        if(this.deck.findIfPosFilled([startingPos[0]-1,startingPos[1]-2]) && (startingPos[0]-1)>=1 && (startingPos[1]-2) >=1){
+            hold = this.deck.findByPos([startingPos[0]-1,startingPos[1]-2]);
+            if(hold.get_color != piece.get_color){
+                outcome.push([startingPos[0]-1,startingPos[1]-2]);
+            }
+        }else if((startingPos[0]-1)>=1 && (startingPos[1]-2) >=1){
+            outcome.push([startingPos[0]-1,startingPos[1]-2]);
+        }
+        console.log(outcome);
         return outcome;
     }
     
@@ -284,52 +580,66 @@ class ChessBoard {
         var bottomRight = true;
         var bottomLeft = true;
         var hold;
+        var k;
+        var j;
+        var count = 1;
         //two diagonals, split into fours RIGHT SIDE
         for(let i = startingPos[0]+1; i<=8; i++){
-            for(let k = startingPos[1]+1; k <= 8; k++){
                 console.log("Hello")
-                if(this.deck.findIfPosFilled([i,k]) && topRight){
+                k = startingPos[1]+count;
+                if(this.deck.findIfPosFilled([i,k]) && topRight && k<=8){
                     hold = this.deck.findByPos([i,k]);
                     if(hold.get_color != piece.get_color){
                         outcome.push([i,k]);
+                        break;
                     }else{
                         topRight = false;
+                        break;
                     }
-                }else if(topRight){
+                }else if(topRight && k<=8){
                     outcome.push([i,k]);
                 }
-            }
-            for(let j = startingPos[1]-1; j >= 1; j--){
-                if(this.deck.findIfPosFilled([i,j]) && bottomRight){
+                count++;
+        } 
+        count = 1;  
+        for(let i = startingPos[0]+1; i<=8; i++){
+                j = startingPos[1]-count;
+                if(this.deck.findIfPosFilled([i,j]) && bottomRight && j >= 1){
                     hold = this.deck.findByPos([i,j]);
                     if(hold.get_color != piece.get_color){
                         outcome.push([i,j]);
+                        break;
                     }else{
                         bottomRight = false;
+                        break;
                     }
                 }
-                else if (bottomRight){
+                else if (bottomRight && j>=1){
                     outcome.push([i,j]);
                 }
-            }
-
+        
+            count++;
         }
         //LEFT SIDE
+        count = 1;
         for(let i = startingPos[0]-1; i>=1; i--){
-            for(let k = startingPos[1]+1; k <= 8; k++){
-                if(this.deck.findIfPosFilled([i,k]) && topLeft){
+                k = startingPos[1]+count;
+                if(this.deck.findIfPosFilled([i,k]) && topLeft && k<=8){
                     hold = this.deck.findByPos([i,k]);
                     if(hold.get_color != piece.get_color){
                         outcome.push([i,k]);
                     }else{
                         topLeft = false;
                     }
-                }else if(topLeft){
+                }else if(topLeft && k<=8){
                     outcome.push([i,k]);
                 }
-            }
-            for(let j = startingPos[1]-1; j>= 1; j--){
-                if(this.deck.findIfPosFilled([i,j]) && bottomLeft){
+            count++;
+        }
+        count =1;
+        for(let i = startingPos[0]-1; i>=1; i--){   
+                j = startingPos[1]-count;
+                if(this.deck.findIfPosFilled([i,j]) && bottomLeft && j >=1){
                     hold = this.deck.findByPos([i,j]);
                     if(hold.get_color != piece.get_color){
                         outcome.push([i,j]);
@@ -337,39 +647,15 @@ class ChessBoard {
                         bottomLeft = false;
                     }
                 }
-                else if (bottomLeft){
+                else if (bottomLeft && j>=1){
                     outcome.push([i,j]);
                 }
-            }
-
+            
+            count++;
         }
-
-
-
         console.log(outcome);
         return outcome;
-    }
-    
-
-   
-    
+    }   
 }
-
-
-
-   
-    /* var length = this.deck.inUsePieces.length;
-    if(this.deck.selectedPieces.length == 0){
-        for(let i = 0; i<length; i++){
-            if(arrayEquals(this.deck.inUsePieces[i].get_pos, position)){
-                this.deck.selectedPieces.push(this.deck.inUsePieces[i]);
-            }
-        }
-    }else if(this.deck.selectedPieces.length == 1){
-        //Check here in another method if position wanting to move is an acceptable location
-        this.deck.selectedPieces[0].set_pos(position);
-    }
-    
-    console.log(position); */
 
 

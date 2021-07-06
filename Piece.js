@@ -25,7 +25,7 @@ class Piece{
   }
 
   
-  set set_pos(update){
+  set_pos(update){
 		this.position = update;
   }
  
