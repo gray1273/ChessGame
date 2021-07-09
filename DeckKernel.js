@@ -128,6 +128,7 @@ class DeckKernel {
 			for(let i = 0; i<this.inUseWhitePieces.length; i++){
 				if(this.inUseWhitePieces[i].get_id == piece.get_id){
 					this.inUseWhitePieces.splice(i,1);
+					break;
 				}
 			}
 		}else{
@@ -135,6 +136,7 @@ class DeckKernel {
 			for(let i = 0; i<this.inUseBlackPieces.length; i++){
 				if(this.inUseBlackPieces[i].get_id == piece.get_id){
 					this.inUseBlackPieces.splice(i,1);
+					break;
 				}
 			}
 		}
