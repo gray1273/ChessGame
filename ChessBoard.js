@@ -110,6 +110,7 @@ class ChessBoard {
         if(this.deck.findIfPosFilled(position1)){
             var piece = this.deck.findByPos(position1);
             var type = piece.get_type;
+            
             switch(type){
                 case "King":
                     validMoves = this.movementKing(piece);
@@ -162,18 +163,23 @@ class ChessBoard {
 
                 }
             }
+            
             if(validMoveBool){
                 piece.set_pos(position2);
+                //Check if the new position puts the other king in check
+                
                 //Check to see if pawn promotes, remove it and call promoteQueen with it.
                 if(piece.get_type == "Pawn"){
                     this.deck.checkPromotion(piece);
                 }
                 this.updateBoard();
+                this.checkIfChecked(piece);
             }else{
                 alert("Invalid Move");
                 //Restore turn
                 this.flipTurn();
             }
+            
     }
     }
 
@@ -185,6 +191,87 @@ class ChessBoard {
             this.set_turn("White");
         }
     }
+
+
+    checkIfChecked(piece){
+        var validMoves=[];
+        var type;
+        var compare;
+        var whiteKingCheck = false;
+        var blackKingCheck = false;
+        type = piece.get_type;
+        
+        switch(type){
+            case "King":
+                validMoves = this.movementKing(piece);
+                break;
+            case "Queen":
+                validMoves = this.movementQueen(piece);
+                break;
+            case "Rook":
+                validMoves = this.movementRook(piece);
+                break;
+            case "Bishop":
+                validMoves = this.movementBishop(piece);
+                break;
+            case "Pawn":
+                validMoves = this.movementPawn(piece);
+                break;
+            case "Knight":
+                validMoves = this.movementKnight(piece);
+                break;
+        }
+        
+        if(piece.get_color == "White"){
+            //Check black king position against valid moves
+            compare = this.deck.findBlackKing();
+            for(let k = 0; k<validMoves.length; k++){
+                if(arrayEquals(compare,validMoves[k])){
+                    blackKingCheck = true;
+                    if(blackKingCheck){
+                        //Check if Mate
+                        this.checkIfMate();
+                    }
+                    alert("Black King is in Check");
+                }
+            }
+        }else{
+            //Check White king position against valid moves
+            compare = this.deck.findWhiteKing();
+            for(let k = 0; k<validMoves.length; k++){
+                if(arrayEquals(compare,validMoves[k])){
+                    whiteKingCheck = true;
+                    if(whiteKingCheck){
+                        //Check if Mate
+                        this.checkIfMate();
+                    }
+                    alert("White King is in Check");
+                }
+            }
+        }
+        
+
+        
+
+    }
+    //Pos needs to be checked if its in the board.
+    addValidSpot(pos,piece){
+        var outcome = [];
+        var hold;
+        if(pos[0] >=1 && pos[0] <=8 && pos[1]<=8 && pos[1] >= 1){
+            if(this.deck.findIfPosFilled([pos[0],pos[1]])){
+                hold = this.deck.findByPos([pos[0],pos[1]]);
+                if(hold.get_color != piece.get_color){
+                    outcome.push([pos[0],pos[1]]);
+                 }
+            }else {
+                outcome.push([pos[0],pos[1]]);
+            }   
+        }
+        return outcome;
+
+    }
+
 
     //Movement logic
     movementRook(piece){
@@ -394,79 +481,27 @@ class ChessBoard {
         var outcome = [];
         var hold;
         var startingPos = piece.get_pos;
+        var potentialMoves = [];
+        var temp;
         //King can move 8 spots
         //Check above row
         
-        if(this.deck.findIfPosFilled([startingPos[0]+1,startingPos[1]]) && (startingPos[0]+1)<=8){
-            hold = this.deck.findByPos([startingPos[0]+1,startingPos[1]]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]+1,startingPos[1]]);
+        //Need arrays of potential movement
+        //Iterate through arrays and call method.
+        for(let i = -1; i<2; i++){
+            potentialMoves.push([startingPos[0]+1,startingPos[1]+i]);
+            potentialMoves.push([startingPos[0]-1,startingPos[1]+i]);
+            if(i != 0){
+                potentialMoves.push([startingPos[0],startingPos[1]+i]);
             }
-        }else if((startingPos[0]+1)<=8){
-            outcome.push([startingPos[0]+1,startingPos[1]]);
         }
-        //Check below
-        if(this.deck.findIfPosFilled([startingPos[0]-1,startingPos[1]]) && (startingPos[0]-1)>=1){
-            hold = this.deck.findByPos([startingPos[0]-1,startingPos[1]]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]-1,startingPos[1]]);
+        for(let k =0; k<potentialMoves.length; k++){
+            temp = this.addValidSpot(potentialMoves[k],piece);
+            
+            if(temp.length > 0){
+                outcome = outcome.concat(temp);
+                console.log("Adding a valid spot");
             }
-        }else if((startingPos[0]-1)>=1){
-            outcome.push([startingPos[0]-1,startingPos[1]]);
-        }
-        //Check Right
-        if(this.deck.findIfPosFilled([startingPos[0],startingPos[1]+1]) && (startingPos[1]+1)<=8){
-            hold = this.deck.findByPos([startingPos[0],startingPos[1]+1]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0],startingPos[1]+1]);
-            }
-        }else if((startingPos[1]+1)<=8){
-            outcome.push([startingPos[0],startingPos[1]+1]);
-        }
-        //Check left
-        if(this.deck.findIfPosFilled([startingPos[0],startingPos[1]-1]) && (startingPos[1]-1)>=1){
-            hold = this.deck.findByPos([startingPos[0],startingPos[1]-1]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0],startingPos[1]-1]);
-            }
-        }else if((startingPos[1]-1)>=1){
-            outcome.push([startingPos[0],startingPos[1]-1]);
-        }
-        //Check topRight
-        if(this.deck.findIfPosFilled([startingPos[0]+1,startingPos[1]+1]) && (startingPos[1]+1)<=8 && (startingPos[0]+1) <=8){
-            hold = this.deck.findByPos([startingPos[0]+1,startingPos[1]+1]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]+1,startingPos[1]+1]);
-            }
-        }else if((startingPos[1]+1)<=8 && (startingPos[0]+1) <=8){
-            outcome.push([startingPos[0]+1,startingPos[1]+1]);
-        }
-        //Check topLeft
-        if(this.deck.findIfPosFilled([startingPos[0]+1,startingPos[1]-1]) && (startingPos[1]-1)>=1 && (startingPos[0]+1) <=8){
-            hold = this.deck.findByPos([startingPos[0]+1,startingPos[1]-1]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]+1,startingPos[1]-1]);
-            }
-        }else if((startingPos[1]-1)>=1 && (startingPos[0]+1) <=8){
-            outcome.push([startingPos[0]+1,startingPos[1]-1]);
-        }
-        //Check bottomRight
-        if(this.deck.findIfPosFilled([startingPos[0]-1,startingPos[1]+1]) && (startingPos[1]+1)<=8 && (startingPos[0]-1) >=1){
-            hold = this.deck.findByPos([startingPos[0]-1,startingPos[1]+1]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]-1,startingPos[1]+1]);
-            }
-        }else if((startingPos[1]+1)<=8 && (startingPos[0]-1) >=1){
-            outcome.push([startingPos[0]-1,startingPos[1]+1]);
-        }
-        //Check bottomLeft
-        if(this.deck.findIfPosFilled([startingPos[0]-1,startingPos[1]-1]) && (startingPos[1]-1)>=1 && (startingPos[0]-1) >=1){
-            hold = this.deck.findByPos([startingPos[0]-1,startingPos[1]-1]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]-1,startingPos[1]-1]);
-            }
-        }else if((startingPos[1]-1)>=1 && (startingPos[0]-1) >=1){
-            outcome.push([startingPos[0]-1,startingPos[1]-1]);
         }
         console.log(outcome);
         return outcome;
@@ -495,79 +530,35 @@ class ChessBoard {
         var outcome = [];
         var hold;
         var startingPos = piece.get_pos;
+        var potentialMoves = [];
+        var temp;
         //Every knight can move up to 8 spots
         //Up and Right
-        if(this.deck.findIfPosFilled([startingPos[0]+2,startingPos[1]+1]) && (startingPos[0]+2)<=8 && (startingPos[1]+1) <=8){
-            hold = this.deck.findByPos([startingPos[0]+2,startingPos[1]+1]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]+2,startingPos[1]+1]);
+        //Create array of potential valid movement spots
+
+        //Up and right/left
+        potentialMoves.push([startingPos[0]+2,startingPos[1]+1]);
+        potentialMoves.push([startingPos[0]+2,startingPos[1]-1]);
+        //Down and right/left
+        potentialMoves.push([startingPos[0]-2,startingPos[1]+1]);
+        potentialMoves.push([startingPos[0]-2,startingPos[1]-1]);
+        //Right and up/down
+        potentialMoves.push([startingPos[0]+1,startingPos[1]+2]);
+        potentialMoves.push([startingPos[0]-1,startingPos[1]+2]);
+        //Left and up/down
+        potentialMoves.push([startingPos[0]+1,startingPos[1]-2]);
+        potentialMoves.push([startingPos[0]-1,startingPos[1]-2]);
+        //Check the spots
+        for(let k =0; k<potentialMoves.length; k++){
+            temp = this.addValidSpot(potentialMoves[k],piece);
+            
+            if(temp.length > 0){
+                outcome = outcome.concat(temp);
+                console.log("Adding a valid spot");
             }
-        }else if((startingPos[0]+2)<=8 && (startingPos[1]+1) <=8){
-            outcome.push([startingPos[0]+2,startingPos[1]+1]);
         }
-        //Up and Left
-        if(this.deck.findIfPosFilled([startingPos[0]+2,startingPos[1]-1]) && (startingPos[0]+2)<=8 && (startingPos[1]-1) >=1){
-            hold = this.deck.findByPos([startingPos[0]+2,startingPos[1]-1]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]+2,startingPos[1]-1]);
-            }
-        }else if((startingPos[0]+2)<=8 && (startingPos[1]-1) >=1){
-            outcome.push([startingPos[0]+2,startingPos[1]-1]);
-        }
-        //Down and Right
-        if(this.deck.findIfPosFilled([startingPos[0]-2,startingPos[1]+1]) && (startingPos[0]-2)>=1 && (startingPos[1]+1) <=8){
-            hold = this.deck.findByPos([startingPos[0]-2,startingPos[1]+1]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]-2,startingPos[1]+1]);
-            }
-        }else if((startingPos[0]-2)>=1 && (startingPos[1]+1) <=8){
-            outcome.push([startingPos[0]-2,startingPos[1]+1]);
-        }
-        //Down and left
-        if(this.deck.findIfPosFilled([startingPos[0]-2,startingPos[1]-1]) && (startingPos[0]-2)>=1 && (startingPos[1]-1) >=1){
-            hold = this.deck.findByPos([startingPos[0]-2,startingPos[1]-1]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]-2,startingPos[1]-1]);
-            }
-        }else if((startingPos[0]-2)>=1 && (startingPos[1]-1) >=1){
-            outcome.push([startingPos[0]-2,startingPos[1]-1]);
-        }
-        //Right and up
-        if(this.deck.findIfPosFilled([startingPos[0]+1,startingPos[1]+2]) && (startingPos[0]+1)<=8 && (startingPos[1]+2) <=8){
-            hold = this.deck.findByPos([startingPos[0]+1,startingPos[1]+2]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]+1,startingPos[1]+2]);
-            }
-        }else if((startingPos[0]+1)<=8 && (startingPos[1]+2) <=8){
-            outcome.push([startingPos[0]+1,startingPos[1]+2]);
-        }
-        //Right and down
-        if(this.deck.findIfPosFilled([startingPos[0]-1,startingPos[1]+2]) && (startingPos[0]-1)>=1 && (startingPos[1]+2) <=8){
-            hold = this.deck.findByPos([startingPos[0]-1,startingPos[1]+2]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]-1,startingPos[1]+2]);
-            }
-        }else if((startingPos[0]-1)>=1 && (startingPos[1]+2) <=8){
-            outcome.push([startingPos[0]-1,startingPos[1]+2]);
-        }
-        //Left and up
-        if(this.deck.findIfPosFilled([startingPos[0]+1,startingPos[1]-2]) && (startingPos[0]+1)<=8 && (startingPos[1]-2) >=1){
-            hold = this.deck.findByPos([startingPos[0]+1,startingPos[1]-2]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]+1,startingPos[1]-2]);
-            }
-        }else if((startingPos[0]+1)<=8 && (startingPos[1]-2) >=1){
-            outcome.push([startingPos[0]+1,startingPos[1]-2]);
-        }
-        //Left and down
-        if(this.deck.findIfPosFilled([startingPos[0]-1,startingPos[1]-2]) && (startingPos[0]-1)>=1 && (startingPos[1]-2) >=1){
-            hold = this.deck.findByPos([startingPos[0]-1,startingPos[1]-2]);
-            if(hold.get_color != piece.get_color){
-                outcome.push([startingPos[0]-1,startingPos[1]-2]);
-            }
-        }else if((startingPos[0]-1)>=1 && (startingPos[1]-2) >=1){
-            outcome.push([startingPos[0]-1,startingPos[1]-2]);
-        }
+
+        
         console.log(outcome);
         return outcome;
     }
