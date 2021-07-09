@@ -106,6 +106,28 @@ class DeckKernel {
 		return piece.get_pos;
 	}
 
+	getBlackKing(){
+		var piece;
+		for(let i = 0; i<this.inUseBlackPieces.length; i++){
+			if(this.inUseBlackPieces[i].get_type == "King"){
+				piece = this.inUseBlackPieces[i];
+				break;
+			}
+		}
+		return piece;
+	}
+
+	getWhiteKing(){
+		var piece;
+		for(let i = 0; i<this.inUseWhitePieces.length; i++){
+			if(this.inUseWhitePieces[i].get_type == "King"){
+				piece = this.inUseWhitePieces[i];
+				break;
+			}
+		}
+		return piece;
+	}
+
 	checkPromotion(piece){
 		//CHECK TO SEE IF QUEEN EXISTS BEFORE PROMOTING TO QUEEN
 		if(piece.get_color == "White"){
