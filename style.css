@@ -23,24 +23,29 @@
 
 }
 .centerPiece{
-	margin-top: 5px;
-	margin-right: 5px;
-	margin-bottom: 5px;
-	margin-left: 5px;
+	margin-top: auto;
+	margin-right: auto;
+	
 }
 .white{
 	background-color: darkcyan;
 	width: 80px;
 	height: 80px;
+	
 }
 .black{
 	background-color: lightblue;
 	width: 80px;
 	height: 80px;
+	
 }
 .selected{
 	border-style: solid;
-	border:5px;
-	border-color: orange;
+	border-color: black;
 	background-color: orange;
+}
+.available{
+	background-color:  lightgreen;
+	border-style: solid;
+	border-color: black;
 }

@@ -5,6 +5,7 @@ class DeckKernel {
 		this.selectedPieces = [];
 		this.inUseWhitePieces = [];
 		this.inUseBlackPieces = [];
+		this.validMoves = [];
 
 		this.reset();
 		
@@ -14,6 +15,7 @@ class DeckKernel {
 		this.selectedPieces = [];
 		this.inUseWhitePieces = [];
 		this.inUseBlackPieces = [];
+		this.validMoves = []
 		
 			for(let i = 0; i <= 7; i++){
 				this.inUseWhitePieces.push(new Piece("Pawn",(i),[2,i+1],"White","./images/white_pawn.png"));
@@ -128,39 +130,49 @@ class DeckKernel {
 		return piece;
 	}
 
+	
+
+
+
 	checkPromotion(piece){
 		//CHECK TO SEE IF QUEEN EXISTS BEFORE PROMOTING TO QUEEN
 		if(piece.get_color == "White"){
 			//promote if reaches row 8
 			if(piece.get_pos[0] == 8){
-				this.promoteQueen(piece);
+				this.promotePawn(piece);
 			}
 		}else{
 			//promote if reaches row 1
 			if(piece.get_pos[0] == 1){
-				this.promoteQueen(piece);
+				this.promotePawn(piece);
 			}
 		}
 		
 	}
 
-	promoteQueen(piece){
+	
+
+
+
+	promotePawn(piece){
 		if(piece.get_color == "White"){
-			this.inUseWhitePieces.push(new Piece ("Queen",15,piece.get_pos,"White","./images/white_queen.png"));
+			
 			for(let i = 0; i<this.inUseWhitePieces.length; i++){
 				if(this.inUseWhitePieces[i].get_id == piece.get_id){
 					this.inUseWhitePieces.splice(i,1);
-					break;
+					
 				}
 			}
+			this.inUseWhitePieces.push(new Piece ("Queen",piece.get_id,piece.get_pos,"White","./images/white_queen.png"));
 		}else{
-			this.inUseBlackPieces.push(new Piece ("Queen",15,piece.get_pos,"Black","./images/black_queen.png"));
+			
 			for(let i = 0; i<this.inUseBlackPieces.length; i++){
 				if(this.inUseBlackPieces[i].get_id == piece.get_id){
 					this.inUseBlackPieces.splice(i,1);
-					break;
+					
 				}
 			}
+			this.inUseBlackPieces.push(new Piece ("Queen",piece.get_id,piece.get_pos,"Black","./images/black_queen.png"));
 		}
 	}
 }
