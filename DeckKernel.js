@@ -130,6 +130,27 @@ class DeckKernel {
 		return piece;
 	}
 
+	findRook(color, ID){
+		var rook;
+		if(color == "White"){
+			
+			for(let i = 0; i < this.inUseWhitePieces.length; i++){
+				if(this.inUseWhitePieces[i].get_id == ID){
+					rook = this.inUseWhitePieces[i];
+				
+				}
+			}
+		}else{
+			for(let i = 0; i < this.inUseBlackPieces.length; i++){
+				if(this.inUseBlackPieces[i].get_id == ID){
+					rook = this.inUseBlackPieces[i];
+			
+				}
+			}
+		}
+		return rook;
+	}
+
 	
 
 
