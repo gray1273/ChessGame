@@ -1,4 +1,3 @@
-
 class ChessBoard {
     constructor() {
         //Board creates a new deck, deck creates and holds all the pieces
@@ -49,6 +48,8 @@ class ChessBoard {
             strDiv += "</tr>";
         }
     strDiv += "</table>"
+
+
     //Add the rows and columns to the html body.
     document.getElementById("theBoard").innerHTML = strDiv;
     //Update the board with the pieces
@@ -83,7 +84,7 @@ class ChessBoard {
         }
         
         
-        console.log("White King: " + this.deck.findWhiteKing());
+        
     }
 
 
@@ -121,8 +122,8 @@ class ChessBoard {
                 alert("Game over, White won!");
             }
         }
-        console.log("Checking White King " + this.checkingWhiteKing);
-        console.log("Checking Black King " + this.checkingBlackKing);
+        //console.log("Checking White King " + this.checkingWhiteKing);
+        //console.log("Checking Black King " + this.checkingBlackKing);
         //Process alternative movement, only can select the king of the turned color or piece to free said king.
         //Call validWhite/BlackKingMovements to find a list of king moves
         //
@@ -460,7 +461,7 @@ class ChessBoard {
             }
         }
         
-        console.log("Ending " + returnMoves);
+        //console.log("Ending " + returnMoves);
 		return returnMoves;
         
 	}
@@ -494,12 +495,12 @@ class ChessBoard {
         
 
         //check to see if next move is safe
-        console.log("Length: " + kingMoves.length + " " + kingMoves);
+       
        for(let i = 0; i < kingMoves.length; i++){
            doesMoveWork = true;
-           console.log("Inside of loop " + kingMoves[i]);
+           
 			if(this.deck.findIfPosFilled(kingMoves[i])){
-                console.log("Inside if")
+                
                 var piece = this.deck.findByPos(kingMoves[i]);
                 
                 //Dont have to check if the piece is the same color, it is guaranteed to not be
@@ -507,7 +508,7 @@ class ChessBoard {
 
                 for(let k= 0; k<this.deck.inUseWhitePieces.length; k++){
                     if(this.deck.inUseWhitePieces[k].get_id == piece.get_id){
-                        console.log("Removing "+ piece +" from white pieces");
+                        //console.log("Removing "+ piece +" from white pieces");
                         this.deck.inUseWhitePieces.splice(k,1);
                         
                         
@@ -520,7 +521,7 @@ class ChessBoard {
                 //Check if king being there would be a problem
                 for(let j =0; j<whiteMoves.length; j++){
                         if(arrayEquals(whiteMoves[j],kingMoves[i])){
-                            console.log("Removing "+ kingMoves[i]+" from black king moves");
+                            //console.log("Removing "+ kingMoves[i]+" from black king moves");
                             //kingMoves.splice(i,1);
                             doesMoveWork = false;
                         }
@@ -532,7 +533,7 @@ class ChessBoard {
                 
             }else{
                 
-                console.log("Inside else");
+               
                 for(let w = 0; w<this.deck.inUseBlackPieces.length; w++){
                     if(this.deck.inUseBlackPieces[w].get_type == "King"){
                         this.deck.inUseBlackPieces.splice(w,1);
@@ -544,7 +545,7 @@ class ChessBoard {
                     
                         if(arrayEquals(whiteMoves[k],kingMoves[i])){
                             //Do not add
-                            console.log("Removing "+ kingMoves[i]+" from black king moves");
+                            //console.log("Removing "+ kingMoves[i]+" from black king moves");
                             //kingMoves.splice(i,1);
                             doesMoveWork = false;
                         }else{
@@ -558,7 +559,7 @@ class ChessBoard {
                 this.deck.inUseBlackPieces.push(kingPiece);
             }
 		} 
-        console.log("Allowed: " + finalMoves);
+        
         //Remove pieces that are diagonal to pawn checking
         for(let i = 0; i < finalMoves.length; i++){
             doesMoveWork = true;
@@ -584,7 +585,7 @@ class ChessBoard {
             }
         }
         
-        console.log("Ending " + returnMoves);
+        //console.log("Ending " + returnMoves);
 		return returnMoves; 
         //return finalMoves;
 	}
@@ -743,7 +744,7 @@ class ChessBoard {
         
         console.log("Piece moved:     Start: "+ position1 + " Ending: " + position2);
         
-       
+        var letter = ["","A","B","C","D","E","F","G","H"];
        
         var temp = [];
         var validMoveBool = false;
@@ -753,9 +754,47 @@ class ChessBoard {
         if(this.deck.findIfPosFilled(position1)){
             var piece = this.deck.findByPos(position1);
             var type = piece.get_type;
+            var enPassPiece;
+            if(type == "Pawn"){
+
+                
+                //Check en passant removal
+                if(position1[1] != position2[1]){
+                    //Pawn moved diagonally
+                    if(this.deck.findIfPosFilled(position2)){
+                        //Moved normally
+                    }else{
+                        //Moved with en passant so we have to delete other piece
+                        if(piece.get_color == "White"){
+                            if(this.deck.findIfPosFilled([5,position2[1]])){
+                                enPassPiece = this.deck.findByPos([5,position2[1]]);
+                                for(let i = 0; i < this.deck.inUseBlackPieces.length; i++){
+                                    if(this.deck.inUseBlackPieces[i].get_id == enPassPiece.get_id){
+                                        this.deck.inUseBlackPieces.splice(i,1);
+                                    }
+                                }
+                            }
+                            
+                        }else{
+                            if(this.deck.findIfPosFilled([4,position2[1]])){
+                                enPassPiece = this.deck.findByPos([4,position2[1]]);
+                                for(let i = 0; i < this.deck.inUseWhitePieces.length; i++){
+                                    if(this.deck.inUseWhitePieces[i].get_id == enPassPiece.get_id){
+                                        this.deck.inUseWhitePieces.splice(i,1);
+                                    }
+                                }
+                            }
+                            
+                        }
+                        
+
+                    }
+                }
+            }
+
+
             
             
-            console.log(piece);
             for(let i = 0; i<this.deck.validMoves.length; i++){
                 temp = this.deck.validMoves[i];
                 
@@ -801,12 +840,54 @@ class ChessBoard {
             
             if(validMoveBool){
                 piece.set_pos(position2);
+                piece.add_moves(position1 + " moved to " + position2);
+
+                var tempStr;
+                var str = document.getElementById("lastMoves");
+                tempStr = str.textContent;
+                
+                str.textContent = piece.get_color+" "+piece.get_type + " at "+letter[position1[1]] + "" + position1[0]+" moved to " + letter[position2[1]] + "" + position2[0]+ " \r\n";
+                str.textContent += tempStr;
+                
+                //console.log(piece.get_moves);
                 //Check if the new position puts the other king in check
                 
                 //Check to see if pawn promotes, remove it and call promoteQueen with it.
-                if(piece.get_type == "Pawn"){
+                if(type == "Pawn"){
+
                     this.deck.checkPromotion(piece);
                 }
+
+                //Check to see if king castled and move rook
+                if(piece.get_type == "King" && piece.get_moves.length == 1){
+                    var string = piece.get_moves[0];
+                    var rook;
+                    if(string.charAt(2) - string.charAt(15) == 2){
+                        //Moved left
+                        if(piece.get_color == "White"){
+                            //Find and set white rook with ID of 13 to [1,4]
+                            rook = this.deck.findRook("White", "13");
+                            rook.set_pos([1,4]);
+                        }else{
+                            //Find and set white rook with ID of 13 to [8,4]
+                            rook = this.deck.findRook("Black", "13");
+                            rook.set_pos([8,4]);
+                        }
+                    }else if(string.charAt(2) - string.charAt(15) == -2){
+                        //Moved Right
+                        if(piece.get_color == "White"){
+                            //Find and set white rook with ID of 12 to [1,6]
+                            rook = this.deck.findRook("White", "12");
+                           
+                            rook.set_pos([1,6]);
+                        }else{
+                            //Find and set black rook with ID of 12 to [8,6]
+                            rook = this.deck.findRook("Black", "12");
+                            rook.set_pos([8,6]);
+                        }
+                    }
+                }
+
                 this.updateBoard();
 
                 this.flipTurn();
@@ -825,7 +906,97 @@ class ChessBoard {
     }
     }
 
+    canWhiteKingCastle(){
+        var piece = this.deck.getWhiteKing();
+        var leftRook;
+        var rightRook;
+        var canLeft = true;
+        var canRight = true;
 
+        //output refers to spots that the king can move to, not the rook spots
+        var output = [];
+        //Has to be first move from king
+        if(piece.get_moves.length == 0 && this.whiteKingCheck == false){
+           //Assign left and Right rook
+           for(let i = 0; i < this.deck.inUseWhitePieces.length; i++){
+               if(this.deck.inUseWhitePieces[i].get_id == "13"){
+                    leftRook = this.deck.inUseWhitePieces[i];
+               }else if(this.deck.inUseWhitePieces[i].get_id == "12"){
+                    rightRook = this.deck.inUseWhitePieces[i];
+               }
+           }
+           //Check left rook and the intermediate pieces
+           if(leftRook.get_moves.length == 0){
+                for(let i = 2; i <= 4; i++){
+                    if(this.deck.findIfPosFilled([1,i])){
+                        canLeft = false;
+                    }
+                }
+                if(canLeft){
+                    output.push([1,3]); 
+                }
+           }
+           if(rightRook.get_moves.length == 0){
+            for(let i = 6; i <= 7; i++){
+                if(this.deck.findIfPosFilled([1,i])){
+                    canRight = false;
+                }
+            }
+            if(canRight){
+                output.push([1,7]); 
+            }
+           }
+
+
+        }
+        return output;
+    }
+    canBlackKingCastle(){
+
+        var piece = this.deck.getBlackKing();
+        var leftRook;
+        var rightRook;
+        var canLeft = true;
+        var canRight = true;
+
+        //output refers to spots that the king can move to, not the rook spots
+        var output = [];
+        //Has to be first move from king
+        if(piece.get_moves.length == 0 && this.blackKingCheck == false){
+           //Assign left and Right rook
+           for(let i = 0; i < this.deck.inUseBlackPieces.length; i++){
+               if(this.deck.inUseBlackPieces[i].get_id == "13"){
+                    leftRook = this.deck.inUseBlackPieces[i];
+               }else if(this.deck.inUseBlackPieces[i].get_id == "12"){
+                    rightRook = this.deck.inUseBlackPieces[i];
+               }
+           }
+           //Check left rook and the intermediate pieces
+           if(leftRook.get_moves.length == 0){
+                for(let i = 2; i <= 4; i++){
+                    if(this.deck.findIfPosFilled([8,i])){
+                        canLeft = false;
+                    }
+                }
+                if(canLeft){
+                    output.push([8,3]); 
+                }
+           }
+           if(rightRook.get_moves.length == 0){
+            for(let i = 6; i <= 7; i++){
+                if(this.deck.findIfPosFilled([8,i])){
+                    canRight = false;
+                }
+            }
+            if(canRight){
+                output.push([8,7]); 
+            }
+           }
+
+
+        }
+        return output;
+    }
 
     turnGreen(){
         var temp;
@@ -1226,10 +1397,70 @@ class ChessBoard {
 
             //Check to see if can take diagonally
             
-        }else{
-            //Promote to the queen here.
         }
-        //console.log(outcome);
+        //Check en passant here
+        if(color && temp == 5){
+            var pawnPiece;
+            var string;
+            //Check enemy pawn on either side of col
+            if(col >=2){
+                if(this.deck.findIfPosFilled([5,col-1])){
+                    pawnPiece = this.deck.findByPos([5,col-1]);
+                    if(pawnPiece.get_type == "Pawn" && pawnPiece.get_color == "Black"){
+                        string = pawnPiece.get_moves[0];
+                        if(string.charAt(0) - string.charAt(13) == 2){
+                            outcome.push([6,col-1]);
+
+                        }
+                    }
+
+                }
+            }
+            if(col <= 7){
+                if(this.deck.findIfPosFilled([5,col+1])){
+                    pawnPiece = this.deck.findByPos([5,col+1]);
+                    if(pawnPiece.get_type == "Pawn" && pawnPiece.get_color == "Black"){
+                        string = pawnPiece.get_moves[0];
+                        if(string.charAt(0) - string.charAt(13) == 2){
+                            outcome.push([6,col+1]);
+
+                        }
+                    }
+                } 
+            }
+            
+            
+        }else if(!color && temp == 4){
+            var pawnPiece;
+            var string;
+            //Check enemy pawn on either side of col
+            if(col >=2){
+                if(this.deck.findIfPosFilled([4,col-1])){
+                    pawnPiece = this.deck.findByPos([4,col-1]);
+                    if(pawnPiece.get_type == "Pawn" && pawnPiece.get_color == "White"){
+                        string = pawnPiece.get_moves[0];
+                        if(string.charAt(0) - string.charAt(13) == -2){
+                            outcome.push([3,col-1]);
+
+                        }
+                    }
+
+                }
+            }
+            if(col <= 7){
+                if(this.deck.findIfPosFilled([4,col+1])){
+                    pawnPiece = this.deck.findByPos([4,col+1]);
+                    if(pawnPiece.get_type == "Pawn" && pawnPiece.get_color == "White"){
+                        string = pawnPiece.get_moves[0];
+                        if(string.charAt(0) - string.charAt(13) == -2){
+                            outcome.push([3,col+1]);
+
+                        }
+                    }
+                } 
+            }
+        }
+
         return outcome;
 
     }
@@ -1263,6 +1494,12 @@ class ChessBoard {
                 outcome = outcome.concat(temp);
                 //console.log("Adding a valid spot");
             }
+        }
+        if(piece.get_color == "White"){
+            outcome = outcome.concat(this.canWhiteKingCastle());
+        }
+        else{
+            outcome = outcome.concat(this.canBlackKingCastle());
         }
         //console.log(outcome);
         return outcome;
