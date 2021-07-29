@@ -6,6 +6,7 @@ class Piece{
 	this.position = position;
   this.color = color;
   this.source = source;
+  this.moves = [];
   }
   //Accessor methods to get attributes from cards
   get get_type(){
@@ -23,10 +24,16 @@ class Piece{
   get get_source(){
     return this.source;
   }
+  get get_moves(){
+    return this.moves;
+  }
 
   
   set_pos(update){
 		this.position = update;
+  }
+  add_moves(move){
+    this.moves.push(move);
   }
  
 }

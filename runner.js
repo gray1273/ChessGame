@@ -1,7 +1,4 @@
 this.board = new ChessBoard();
-var white = this.board.deck.inUseWhitePieces;
-var black = this.board.deck.inUseBlackPieces;
-var selected = this.board.deck.selectedPieces;
 
 function space(position){
 	this.board.processClick.call(this.board,position);	
