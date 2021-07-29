@@ -1,16 +1,7 @@
-# Javascript Game Of Set
+# Javascript Game Of Chess
 
-Team TacticalHippos
+Nathan Gray
 
-## Rules
+## Initial Release
 
-( https://en.wikipedia.org/wiki/Set_(card_game) )
-
-A set consists of three cards satisfying all of these conditions:
-
-- They all have the same number or have three different numbers.
-- They all have the same shape or have three different shapes.
-- They all have the same shading or have three different shadings.
-- They all have the same color or have three different colors.
-
-## Controls
+May not be completely bug free
